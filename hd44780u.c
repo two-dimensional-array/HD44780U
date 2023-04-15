@@ -66,12 +66,22 @@ static void SendByte(hd44780u_t* pDisplay, uint8_t byte)
 	}
 }
 
-void HD44780UWriteInstruction(hd44780u_t* pDisplay, uint8_t instruction)
+static void WriteInstructionWithDelay(hd44780u_t* pDisplay, uint8_t instruction, uint32_t delay)
 {
 	pDisplay->setRS(false);
 	pDisplay->setRW(false);
 
 	SendByte(pDisplay, instruction);
+
+	if (delay > 0)
+	{
+		HD44780UDelayMS(delay);
+	}
+}
+
+static void WriteInstruction(hd44780u_t* pDisplay, uint8_t instruction)
+{
+	WriteInstructionWithDelay(pDisplay, instruction, 0ul);
 }
 
 void HD44780UWriteData(hd44780u_t* pDisplay, uint8_t data)
@@ -94,9 +104,7 @@ void HD44780USetPosition(hd44780u_t* pDisplay, uint8_t position)
 		}
 
 		position |= COMMAND_SET_POS;
-
-		DisplayWriteInstruction(pDisplay, position);
-		HD44780UDelayMS(COMMAND_SET_POS_DELAY_MS);
+		WriteInstructionWithDelay(pDisplay, position, COMMAND_SET_POS_DELAY_MS);
 	}
 }
 
@@ -142,29 +150,22 @@ void HD44780UInit(hd44780u_t* pDisplay)
 		command = COMMAND_SET_FUCTION_LINES_MASK;
 	}
 	
-	SendByte(pDisplay, command);
-	HD44780UDelayMS(COMMAND_SET_FUCTION_DELAY_MS);
-
-	SendByte(pDisplay, command);
-	HD44780UDelayMS(COMMAND_SET_FUCTION_DELAY_MS);
+	WriteInstructionWithDelay(pDisplay, command, COMMAND_SET_FUCTION_DELAY_MS);
+	WriteInstructionWithDelay(pDisplay, command, COMMAND_SET_FUCTION_DELAY_MS);
 
 	command = COMMAND_SET_DISPLAY_CNTR | COMMAND_SET_DISPLAY_CNTR_BLINK_MASK | COMMAND_SET_DISPLAY_CNTR_CURSOR_MASK | COMMAND_SET_DISPLAY_CNTR_DISPLAY_MASK; 
 
-	SendByte(pDisplay, command);
-	HD44780UDelayMS(COMMAND_SET_DISPLAY_CNTR_DELAY_MS);
+	WriteInstructionWithDelay(pDisplay, command, COMMAND_SET_DISPLAY_CNTR_DELAY_MS);
 
 	command = COMMAND_CLEAR;
 
-	SendByte(pDisplay, command);
-	HD44780UDelayMS(COMMAND_CLEAR_DELAY_MS);
+	WriteInstructionWithDelay(pDisplay, command, COMMAND_CLEAR_DELAY_MS);
 
 	command = COMMAND_SET_ENTRY_MODE | COMMAND_SET_ENTRY_MODE_DIRECTION_MASK;
 
-	SendByte(pDisplay, command);
-	HD44780UDelayMS(COMMAND_SET_ENTRY_MODE_DELAY_MS);
+	WriteInstructionWithDelay(pDisplay, command, COMMAND_SET_ENTRY_MODE_DELAY_MS);
 
 	command = COMMAND_RET_HOME;
 
-	SendByte(pDisplay, COMMAND_RET_HOME);
-	HD44780UDelayMS(COMMAND_RET_HOME_DELAY_MS);
+	WriteInstructionWithDelay(pDisplay, command, COMMAND_RET_HOME_DELAY_MS);
 }

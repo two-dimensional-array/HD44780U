@@ -33,6 +33,7 @@ struct SHD44780U
 typedef struct SHD44780U hd44780u_t;
 
 void HD44780UInit(hd44780u_t* pDisplay);
+void HD44780USetPosition(hd44780u_t* pDisplay, uint8_t position);
 void HD44780UWriteString(hd44780u_t* pDisplay, const char* str);
 
 #ifdef __cplusplus
