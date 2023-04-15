@@ -35,14 +35,32 @@
 
 #define WRITE_DATA_DELAY_MS 45ul
 
+#if (HD44780U_ROW_COUNT == HD44780U_USE_ONLY_1_ROW_COUNT)
+#define __GET_ROW_COUNT(handler) (1u)
+#elif (HD44780U_ROW_COUNT == HD44780U_USE_ONLY_2_ROW_COUNT)
+#define __GET_ROW_COUNT(handler) (2u)
+#elif (HD44780U_ROW_COUNT == HD44780U_USE_BOTH_ROW_COUNTS)
 #define __GET_ROW_COUNT(handler) ((OneRow == (handler)->rowCount) ? 1 : 2)
+#else
+#error Define HD44780U_ROW_COUNT is incorrect
+#endif
+
+#if (HD44780U_ROW_LENGHT == HD44780U_USE_ONLY_8_ROW_LENGHT)
+#define __GET_ROW_LENGHT(handler) (8u)
+#elif (HD44780U_ROW_LENGHT == HD44780U_USE_ONLY_16_ROW_LENGHT)
+#define __GET_ROW_LENGHT(handler) (16u)
+#elif (HD44780U_ROW_LENGHT == HD44780U_USE_BOTH_ROW_LENGHTS)
 #define __GET_ROW_LENGHT(handler) ((Lenght8 == (handler)->rowLenght) ? 8 : 16)
+#else
+#error Define HD44780U_ROW_LENGHT is incorrect
+#endif
 
 __attribute__((weak)) void HD44780UDelayMS(volatile uint32_t micros)
 {
 	static_assert("Need redefine HD44780UDelayMS function");
 }
 
+#if ((HD44780U_CONN_MODE == HD44780U_USE_ONLY_HALF_CONN_MODE) || (HD44780U_CONN_MODE == HD44780U_USE_BOTH_CONN_MODES))
 static void SendHalfByte(hd44780u_t* pDisplay, uint8_t byte)
 {
 	pDisplay->setEN(true);
@@ -51,9 +69,20 @@ static void SendHalfByte(hd44780u_t* pDisplay, uint8_t byte)
 	pDisplay->setEN(false);
 	HD44780UDelayMS(1);
 }
+#endif
 
 static void SendByte(hd44780u_t* pDisplay, uint8_t byte)
 {
+#if (HD44780U_CONN_MODE == HD44780U_USE_ONLY_HALF_CONN_MODE)
+	SendHalfByte(pDisplay, (byte >> 4));
+	SendHalfByte(pDisplay, byte);
+#elif (HD44780U_CONN_MODE == HD44780U_USE_ONLY_FULL_CONN_MODE)
+	pDisplay->setEN(true);
+	pDisplay->setData(byte);
+	HD44780UDelayMS(1);
+	pDisplay->setEN(false);
+	HD44780UDelayMS(1);
+#elif (HD44780U_CONN_MODE == HD44780U_USE_BOTH_CONN_MODES)
 	if (pDisplay->connMode == Half)
 	{
 		SendHalfByte(pDisplay, (byte >> 4));
@@ -67,6 +96,9 @@ static void SendByte(hd44780u_t* pDisplay, uint8_t byte)
 		pDisplay->setEN(false);
 		HD44780UDelayMS(1);
 	}
+#else
+#error Define HD44780U_CONN_MODE is incorrect
+#endif
 }
 
 static void WriteInstructionWithDelay(hd44780u_t* pDisplay, uint8_t instruction, uint32_t delay)
@@ -138,21 +170,45 @@ void HD44780UInit(hd44780u_t* pDisplay)
 
 	command = COMMAND_SET_FUCTION;
 
+#if (HD44780U_CONN_MODE == HD44780U_USE_ONLY_HALF_CONN_MODE)
+// Don`t need set COMMAND_SET_FUCTION_DATA_LEN_MASK
+#elif (HD44780U_CONN_MODE == HD44780U_USE_ONLY_FULL_CONN_MODE)
+	command |= COMMAND_SET_FUCTION_DATA_LEN_MASK;
+#elif (HD44780U_CONN_MODE == HD44780U_USE_BOTH_CONN_MODES)
 	if (pDisplay->connMode == Full)
 	{
 		command |= COMMAND_SET_FUCTION_DATA_LEN_MASK;
 	}
+#else
+#error Define HD44780U_CONN_MODE is incorrect
+#endif
 
+#if (HD44780U_FONT == HD44780U_USE_ONLY_5X8_FONT)
+// Don`t need set COMMAND_SET_FUCTION_FONT_MASK
+#elif (HD44780U_FONT == HD44780U_USE_ONLY_5X10_FONT)
+	command |= COMMAND_SET_FUCTION_FONT_MASK;
+#elif (HD44780U_FONT == HD44780U_USE_BOTH_FONTS)
 	if (pDisplay->font == Size5x10)
 	{
 		command |= COMMAND_SET_FUCTION_FONT_MASK;
 	}
+#else
+#error Define HD44780U_FONT is incorrect
+#endif
 
+#if (HD44780U_ROW_COUNT == HD44780U_USE_ONLY_1_ROW_COUNT)
+// Don`t need set COMMAND_SET_FUCTION_LINES_MASK
+#elif (HD44780U_ROW_COUNT == HD44780U_USE_ONLY_2_ROW_COUNT)
+	command |= COMMAND_SET_FUCTION_LINES_MASK;
+#elif (HD44780U_ROW_COUNT == HD44780U_USE_BOTH_ROW_COUNTS)
 	if (pDisplay->rowCount == TwoRows)
 	{
-		command = COMMAND_SET_FUCTION_LINES_MASK;
+		command |= COMMAND_SET_FUCTION_LINES_MASK;
 	}
-	
+#else
+#error Define HD44780U_ROW_COUNT is incorrect
+#endif
+
 	WriteInstructionWithDelay(pDisplay, command, COMMAND_SET_FUCTION_DELAY_MS);
 	WriteInstructionWithDelay(pDisplay, command, COMMAND_SET_FUCTION_DELAY_MS);
 
