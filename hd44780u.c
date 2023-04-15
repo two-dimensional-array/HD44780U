@@ -57,7 +57,7 @@
 
 __attribute__((weak)) void HD44780UDelayMS(volatile uint32_t micros)
 {
-	static_assert("Need redefine HD44780UDelayMS function");
+	static_assert(true, "Need redefine HD44780UDelayMS function");
 }
 
 #if ((HD44780U_CONN_MODE == HD44780U_USE_ONLY_HALF_CONN_MODE) || (HD44780U_CONN_MODE == HD44780U_USE_BOTH_CONN_MODES))
@@ -119,7 +119,7 @@ static void WriteInstruction(hd44780u_t* pDisplay, uint8_t instruction)
 	WriteInstructionWithDelay(pDisplay, instruction, 0ul);
 }
 
-void HD44780UWriteData(hd44780u_t* pDisplay, uint8_t data)
+static void WriteData(hd44780u_t* pDisplay, uint8_t data)
 {
 	pDisplay->setRS(true);
 	pDisplay->setRW(false);
@@ -145,16 +145,16 @@ void HD44780USetPosition(hd44780u_t* pDisplay, uint8_t position)
 
 void HD44780UWriteString(hd44780u_t* pDisplay, const char* str)
 {
-	DisplaySetPosition(pDisplay, 0);
+	HD44780USetPosition(pDisplay, 0);
 
 	for(uint8_t i = 0; (str[i] != 0 && i < 32); i++)
 	{
 		if (i == __GET_ROW_LENGHT(pDisplay))
 		{
-			DisplaySetPosition(pDisplay, __GET_ROW_LENGHT(pDisplay));
+			HD44780USetPosition(pDisplay, __GET_ROW_LENGHT(pDisplay));
 		}
 
-		DisplayWriteData(pDisplay, (uint8_t)str[i]);
+		WriteData(pDisplay, (uint8_t)str[i]);
 	}
 }
 
