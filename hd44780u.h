@@ -6,22 +6,22 @@ extern "C" {
 
 #include <stdint.h>
 
-enum EWH1602ConnMode
+enum EHD44780UConnMode
 {
     Half,
     Full
 };
 
-enum EWH1602Font
+enum EHD44780UFont
 {
     Size5x8,
     Size5x10
 };
 
-struct SWH1602
+struct SHD44780U
 {
-    enum EWH1602ConnMode connMode : 1;
-    enum EWH1602Font font : 1;
+    enum EHD44780UConnMode connMode : 1;
+    enum EHD44780UFont font : 1;
     uint8_t rowCount : 2; // 1 or 2
     uint8_t rowLenght : 5; // 8 or 16
     void (*setEN)(bool);
@@ -30,10 +30,10 @@ struct SWH1602
     void (*setData)(uint8_t);
 };
 
-typedef struct SWH1602 wh1602_t;
+typedef struct SHD44780U hd44780u_t;
 
-void WH1602Init(wh1602_t* pDisplay);
-void WH1602WriteString(wh1602_t* pDisplay, const char* str);
+void HD44780UInit(hd44780u_t* pDisplay);
+void HD44780UWriteString(hd44780u_t* pDisplay, const char* str);
 
 #ifdef __cplusplus
 }
