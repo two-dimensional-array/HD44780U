@@ -35,6 +35,9 @@
 
 #define WRITE_DATA_DELAY_MS 45ul
 
+#define __GET_ROW_COUNT(handler) ((OneRow == (handler)->rowCount) ? 1 : 2)
+#define __GET_ROW_LENGHT(handler) ((Lenght8 == (handler)->rowLenght) ? 8 : 16)
+
 __attribute__((weak)) void HD44780UDelayMS(volatile uint32_t micros)
 {
 	static_assert("Need redefine HD44780UDelayMS function");
@@ -95,11 +98,11 @@ void HD44780UWriteData(hd44780u_t* pDisplay, uint8_t data)
 
 void HD44780USetPosition(hd44780u_t* pDisplay, uint8_t position)
 {
-	if (position < (pDisplay->rowCount * pDisplay->rowLenght))
+	if (position < (__GET_ROW_COUNT(pDisplay) * __GET_ROW_LENGHT(pDisplay)))
 	{
-		if (position >= pDisplay->rowLenght)
+		if (position >= __GET_ROW_LENGHT(pDisplay))
 		{
-			position -= pDisplay->rowLenght;
+			position -= __GET_ROW_LENGHT(pDisplay);
 			position |= COMMAND_SET_POS_LINE_MASK;
 		}
 
@@ -114,9 +117,9 @@ void HD44780UWriteString(hd44780u_t* pDisplay, const char* str)
 
 	for(uint8_t i = 0; (str[i] != 0 && i < 32); i++)
 	{
-		if (i == pDisplay->rowLenght)
+		if (i == __GET_ROW_LENGHT(pDisplay))
 		{
-			DisplaySetPosition(pDisplay, pDisplay->rowLenght);
+			DisplaySetPosition(pDisplay, __GET_ROW_LENGHT(pDisplay));
 		}
 
 		DisplayWriteData(pDisplay, (uint8_t)str[i]);
@@ -145,7 +148,7 @@ void HD44780UInit(hd44780u_t* pDisplay)
 		command |= COMMAND_SET_FUCTION_FONT_MASK;
 	}
 
-	if (pDisplay->rowCount = 2)
+	if (pDisplay->rowCount == TwoRows)
 	{
 		command = COMMAND_SET_FUCTION_LINES_MASK;
 	}
