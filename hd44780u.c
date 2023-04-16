@@ -186,10 +186,28 @@ void HD44780UReturnHome(hd44780u_t* pDisplay)
 	WriteInstructionWithDelay(pDisplay, COMMAND_RET_HOME, COMMAND_RET_HOME_DELAY_MS);
 }
 
+void HD44780USetCursor(hd44780u_t* pDisplay)
+{
+	uint8_t command = COMMAND_SET_DISPLAY_CNTR | COMMAND_SET_DISPLAY_CNTR_DISPLAY_MASK;
+
+	if (pDisplay->cursorState == true)
+	{
+		command |= COMMAND_SET_DISPLAY_CNTR_CURSOR_MASK;
+
+		if (pDisplay->blinkCursorState == true)
+		{
+			command |= COMMAND_SET_DISPLAY_CNTR_BLINK_MASK;
+		}
+	}
+
+	WriteInstructionWithDelay(pDisplay, command, COMMAND_SET_DISPLAY_CNTR_DELAY_MS);
+}
+
 void HD44780UInit(hd44780u_t* pDisplay)
 {
 	pDisplay->setRS(false);
 	pDisplay->setRW(false);
+	SendHalfByte(pDisplay, 0x03);
 	HD44780UDelayMS(40);
 
 	uint8_t command;
@@ -226,17 +244,7 @@ void HD44780UInit(hd44780u_t* pDisplay)
 	WriteInstructionWithDelay(pDisplay, command, COMMAND_SET_FUCTION_DELAY_MS);
 	WriteInstructionWithDelay(pDisplay, command, COMMAND_SET_FUCTION_DELAY_MS);
 
-	command = COMMAND_SET_DISPLAY_CNTR | COMMAND_SET_DISPLAY_CNTR_DISPLAY_MASK;
-
-	if (pDisplay->cursorState == true)
-	{
-		command |= COMMAND_SET_DISPLAY_CNTR_CURSOR_MASK;
-
-		if (pDisplay->blinkCursorState == true)
-		{
-			command |= COMMAND_SET_DISPLAY_CNTR_BLINK_MASK;
-		}
-	}
+	HD44780USetCursor(pDisplay);
 
 	WriteInstructionWithDelay(pDisplay, command, COMMAND_SET_DISPLAY_CNTR_DELAY_MS);
 
