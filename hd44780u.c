@@ -162,11 +162,9 @@ void HD44780UInit(hd44780u_t* pDisplay)
 {
 	pDisplay->setRS(false);
 	pDisplay->setRW(false);
+	HD44780UDelayMS(40);
 
 	uint8_t command;
-
-	//SendHalfByte(pDisplay, 0x03);
-	HD44780UDelayMS(40);
 
 	command = COMMAND_SET_FUCTION;
 

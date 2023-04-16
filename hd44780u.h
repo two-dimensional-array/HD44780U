@@ -106,6 +106,8 @@ struct SHD44780U
 
 typedef struct SHD44780U hd44780u_t;
 
+__attribute__((weak)) void HD44780UDelayMS(volatile uint32_t micros); // Need redefine HD44780UDelayMS function
+
 void HD44780UInit(hd44780u_t* pDisplay);
 void HD44780USetPosition(hd44780u_t* pDisplay, uint8_t position);
 void HD44780UWriteString(hd44780u_t* pDisplay, const char* str);
