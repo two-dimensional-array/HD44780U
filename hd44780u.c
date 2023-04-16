@@ -226,7 +226,17 @@ void HD44780UInit(hd44780u_t* pDisplay)
 	WriteInstructionWithDelay(pDisplay, command, COMMAND_SET_FUCTION_DELAY_MS);
 	WriteInstructionWithDelay(pDisplay, command, COMMAND_SET_FUCTION_DELAY_MS);
 
-	command = COMMAND_SET_DISPLAY_CNTR | COMMAND_SET_DISPLAY_CNTR_BLINK_MASK | COMMAND_SET_DISPLAY_CNTR_CURSOR_MASK | COMMAND_SET_DISPLAY_CNTR_DISPLAY_MASK; 
+	command = COMMAND_SET_DISPLAY_CNTR | COMMAND_SET_DISPLAY_CNTR_DISPLAY_MASK;
+
+	if (pDisplay->cursorState == true)
+	{
+		command |= COMMAND_SET_DISPLAY_CNTR_CURSOR_MASK;
+
+		if (pDisplay->blinkCursorState == true)
+		{
+			command |= COMMAND_SET_DISPLAY_CNTR_BLINK_MASK;
+		}
+	}
 
 	WriteInstructionWithDelay(pDisplay, command, COMMAND_SET_DISPLAY_CNTR_DELAY_MS);
 

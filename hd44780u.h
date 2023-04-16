@@ -98,6 +98,8 @@ struct SHD44780U
 #if (HD44780U_ROW_LENGHT == HD44780U_USE_BOTH_ROW_LENGHTS) 
     hd44780u_row_lenght_t rowLenght : 1;
 #endif
+    bool cursorState : 1;
+    bool blinkCursorState : 1;
     hd44780u_set_gpio_state_t setEN;
     hd44780u_set_gpio_state_t setRW;
     hd44780u_set_gpio_state_t setRS;
