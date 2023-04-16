@@ -176,6 +176,16 @@ void HD44780UWriteString(hd44780u_t* pDisplay, const char* str)
 	}
 }
 
+void HD44780UClear(hd44780u_t* pDisplay)
+{
+	WriteInstructionWithDelay(pDisplay, COMMAND_CLEAR, COMMAND_CLEAR_DELAY_MS);
+}
+
+void HD44780UReturnHome(hd44780u_t* pDisplay)
+{
+	WriteInstructionWithDelay(pDisplay, COMMAND_RET_HOME, COMMAND_RET_HOME_DELAY_MS);
+}
+
 void HD44780UInit(hd44780u_t* pDisplay)
 {
 	pDisplay->setRS(false);
@@ -220,15 +230,11 @@ void HD44780UInit(hd44780u_t* pDisplay)
 
 	WriteInstructionWithDelay(pDisplay, command, COMMAND_SET_DISPLAY_CNTR_DELAY_MS);
 
-	command = COMMAND_CLEAR;
-
-	WriteInstructionWithDelay(pDisplay, command, COMMAND_CLEAR_DELAY_MS);
+	HD44780UClear(pDisplay);
 
 	command = COMMAND_SET_ENTRY_MODE | COMMAND_SET_ENTRY_MODE_DIRECTION_MASK;
 
 	WriteInstructionWithDelay(pDisplay, command, COMMAND_SET_ENTRY_MODE_DELAY_MS);
 
-	command = COMMAND_RET_HOME;
-
-	WriteInstructionWithDelay(pDisplay, command, COMMAND_RET_HOME_DELAY_MS);
+	HD44780UReturnHome(pDisplay);
 }
