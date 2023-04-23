@@ -91,7 +91,9 @@ struct SHD44780U
 
 typedef struct SHD44780U hd44780u_t;
 
-__attribute__((weak)) void HD44780UDelayMS(volatile uint32_t micros); // Need redefine HD44780UDelayMS function
+// Wait time delay in microseconds.
+// This function is declared here only. You have to write your implementation somewhere.
+void HD44780UDelayMS(volatile uint32_t micros);
 
 void HD44780UInit(hd44780u_t* pDisplay);
 void HD44780UClear(hd44780u_t* pDisplay);

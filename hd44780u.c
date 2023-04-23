@@ -1,4 +1,3 @@
-#include <assert.h>
 #include "hd44780u.h"
 
 #ifdef HD44780U_INCLUDE_CONFIG
@@ -119,11 +118,6 @@
 #elif (HD44780U_ROW_COUNT == HD44780U_USE_BOTH_ROW_COUNTS)
 #define __GET_FUNCTION_SET_LINES_MASK(handler) (((handler)->rowCount == TwoRows) ? COMMAND_SET_FUCTION_LINES_MASK : 0)
 #endif
-
-__attribute__((weak)) void HD44780UDelayMS(volatile uint32_t micros)
-{
-	static_assert(true, "Need redefine HD44780UDelayMS function");
-}
 
 #if ((HD44780U_CONN_MODE == HD44780U_USE_ONLY_HALF_CONN_MODE) || (HD44780U_CONN_MODE == HD44780U_USE_BOTH_CONN_MODES))
 static void SendHalfByte(hd44780u_t* pDisplay, uint8_t byte)
