@@ -23,23 +23,6 @@ extern "C" {
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "hd44780u_config.h"
-
-#ifndef HD44780U_CONN_MODE
-#define HD44780U_CONN_MODE HD44780U_USE_BOTH_CONN_MODES
-#endif
-
-#ifndef HD44780U_FONT
-#define HD44780U_FONT HD44780U_USE_BOTH_FONTS
-#endif
-
-#ifndef HD44780U_ROW_COUNT
-#define HD44780U_ROW_COUNT HD44780U_USE_BOTH_ROW_COUNTS
-#endif
-
-#ifndef HD44780U_ROW_LENGHT
-#define HD44780U_ROW_LENGHT HD44780U_USE_BOTH_ROW_LENGHTS
-#endif
 
 #if (HD44780U_CONN_MODE == HD44780U_USE_BOTH_CONN_MODES) 
 enum EHD44780UConnMode
