@@ -9,6 +9,14 @@
 #define __GET_ROW_LENGHT(handler) ((Lenght8 == (handler)->rowLenght) ? 8 : 16)
 #endif
 
+#if (HD44780U_ROW_COUNT == HD44780U_USE_ONLY_1_ROW_COUNT)
+#define __GET_ROW_COUNT(handler) (1u)
+#elif (HD44780U_ROW_COUNT == HD44780U_USE_ONLY_2_ROW_COUNT)
+#define __GET_ROW_COUNT(handler) (2u)
+#elif (HD44780U_ROW_COUNT == HD44780U_USE_BOTH_ROW_COUNTS)
+#define __GET_ROW_COUNT(handler) ((OneRow == (handler)->rowCount) ? 1 : 2)
+#endif
+
 #if (HD44780U_CONN_MODE != HD44780U_USE_ONLY_HALF_CONN_MODE) && \
 	(HD44780U_CONN_MODE != HD44780U_USE_ONLY_FULL_CONN_MODE) && \
 	(HD44780U_CONN_MODE != HD44780U_USE_BOTH_CONN_MODES)
@@ -67,12 +75,30 @@
 
 #define WRITE_DATA_DELAY_MS 45ul
 
+
+#if (HD44780U_CONN_MODE == HD44780U_USE_ONLY_HALF_CONN_MODE)
+#define __GET_FUNCTION_SET_DATA_LEN_MASK(handler) (0)
+#elif (HD44780U_CONN_MODE == HD44780U_USE_ONLY_FULL_CONN_MODE)
+#define __GET_FUNCTION_SET_DATA_LEN_MASK(handler) (COMMAND_SET_FUCTION_DATA_LEN_MASK)
+#elif (HD44780U_CONN_MODE == HD44780U_USE_BOTH_CONN_MODES)
+#define __GET_FUNCTION_SET_DATA_LEN_MASK(handler) (((handler)->connMode == Full) ? COMMAND_SET_FUCTION_DATA_LEN_MASK : 0)
+#endif
+
+#if (HD44780U_FONT == HD44780U_USE_ONLY_5X8_FONT)
+#define __GET_FUNCTION_SET_FONT_MASK(handler) (0)
+#elif (HD44780U_FONT == HD44780U_USE_ONLY_5X10_FONT)
+#define __GET_FUNCTION_SET_FONT_MASK(handler) (COMMAND_SET_FUCTION_FONT_MASK)
+#elif (HD44780U_FONT == HD44780U_USE_BOTH_FONTS)
+#define __GET_FUNCTION_SET_FONT_MASK(handler) (((handler)->font == Size5x10) ? COMMAND_SET_FUCTION_FONT_MASK : 0)
+#endif
+
+
 #if (HD44780U_ROW_COUNT == HD44780U_USE_ONLY_1_ROW_COUNT)
-#define __GET_ROW_COUNT(handler) (1u)
+#define __GET_FUNCTION_SET_LINES_MASK(handler) (0)
 #elif (HD44780U_ROW_COUNT == HD44780U_USE_ONLY_2_ROW_COUNT)
-#define __GET_ROW_COUNT(handler) (2u)
+#define __GET_FUNCTION_SET_LINES_MASK(handler) (COMMAND_SET_FUCTION_LINES_MASK)
 #elif (HD44780U_ROW_COUNT == HD44780U_USE_BOTH_ROW_COUNTS)
-#define __GET_ROW_COUNT(handler) ((OneRow == (handler)->rowCount) ? 1 : 2)
+#define __GET_FUNCTION_SET_LINES_MASK(handler) (((handler)->rowCount == TwoRows) ? COMMAND_SET_FUCTION_LINES_MASK : 0)
 #endif
 
 __attribute__((weak)) void HD44780UDelayMS(volatile uint32_t micros)
@@ -207,47 +233,20 @@ void HD44780UInit(hd44780u_t* pDisplay)
 {
 	pDisplay->setRS(false);
 	pDisplay->setRW(false);
-	SendHalfByte(pDisplay, 0x03);
+	//SendHalfByte(pDisplay, 0x03);
 	HD44780UDelayMS(40);
 
 	uint8_t command;
 
 	command = COMMAND_SET_FUCTION;
-
-#if (HD44780U_CONN_MODE == HD44780U_USE_ONLY_FULL_CONN_MODE)
-	command |= COMMAND_SET_FUCTION_DATA_LEN_MASK;
-#elif (HD44780U_CONN_MODE == HD44780U_USE_BOTH_CONN_MODES)
-	if (pDisplay->connMode == Full)
-	{
-		command |= COMMAND_SET_FUCTION_DATA_LEN_MASK;
-	}
-#endif
-
-#if (HD44780U_FONT == HD44780U_USE_ONLY_5X10_FONT)
-	command |= COMMAND_SET_FUCTION_FONT_MASK;
-#elif (HD44780U_FONT == HD44780U_USE_BOTH_FONTS)
-	if (pDisplay->font == Size5x10)
-	{
-		command |= COMMAND_SET_FUCTION_FONT_MASK;
-	}
-#endif
-
-#if (HD44780U_ROW_COUNT == HD44780U_USE_ONLY_2_ROW_COUNT)
-	command |= COMMAND_SET_FUCTION_LINES_MASK;
-#elif (HD44780U_ROW_COUNT == HD44780U_USE_BOTH_ROW_COUNTS)
-	if (pDisplay->rowCount == TwoRows)
-	{
-		command |= COMMAND_SET_FUCTION_LINES_MASK;
-	}
-#endif
+	command |= __GET_FUNCTION_SET_DATA_LEN_MASK(pDisplay);
+	command |= __GET_FUNCTION_SET_FONT_MASK(pDisplay);
+	command |= __GET_FUNCTION_SET_LINES_MASK(pDisplay);
 
 	WriteInstructionWithDelay(pDisplay, command, COMMAND_SET_FUCTION_DELAY_MS);
 	WriteInstructionWithDelay(pDisplay, command, COMMAND_SET_FUCTION_DELAY_MS);
 
 	HD44780USetCursor(pDisplay);
-
-	WriteInstructionWithDelay(pDisplay, command, COMMAND_SET_DISPLAY_CNTR_DELAY_MS);
-
 	HD44780UClear(pDisplay);
 
 	command = COMMAND_SET_ENTRY_MODE | COMMAND_SET_ENTRY_MODE_DIRECTION_MASK;
