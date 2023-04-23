@@ -117,30 +117,31 @@ static void SendHalfByte(hd44780u_t* pDisplay, uint8_t byte)
 }
 #endif
 
+#define __SEND_BY_HALF_CONN_MODE(handler, byte) \
+	SendHalfByte((handler), ((byte) >> 4));     \
+	SendHalfByte((handler), (byte));
+
+#define __SEND_BY_FULL_CONN_MODE(handler, byte) \
+	(handler)->setEN(true);                     \
+	(handler)->setData((byte));                 \
+	HD44780UDelayMS(1);                         \
+	(handler)->setEN(false);                    \
+	HD44780UDelayMS(1);
+
 static void SendByte(hd44780u_t* pDisplay, uint8_t byte)
 {
 #if (HD44780U_CONN_MODE == HD44780U_USE_ONLY_HALF_CONN_MODE)
-	SendHalfByte(pDisplay, (byte >> 4));
-	SendHalfByte(pDisplay, byte);
+	__SEND_BY_HALF_CONN_MODE(pDisplay, byte);
 #elif (HD44780U_CONN_MODE == HD44780U_USE_ONLY_FULL_CONN_MODE)
-	pDisplay->setEN(true);
-	pDisplay->setData(byte);
-	HD44780UDelayMS(1);
-	pDisplay->setEN(false);
-	HD44780UDelayMS(1);
+	__SEND_BY_FULL_CONN_MODE(pDisplay, byte);
 #elif (HD44780U_CONN_MODE == HD44780U_USE_BOTH_CONN_MODES)
 	if (pDisplay->connMode == Half)
 	{
-		SendHalfByte(pDisplay, (byte >> 4));
-		SendHalfByte(pDisplay, byte);
+		__SEND_BY_HALF_CONN_MODE(pDisplay, byte);
 	}
 	else
 	{
-		pDisplay->setEN(true);
-		pDisplay->setData(byte);
-		HD44780UDelayMS(1);
-		pDisplay->setEN(false);
-		HD44780UDelayMS(1);
+		__SEND_BY_FULL_CONN_MODE(pDisplay, byte);
 	}
 #endif
 }
