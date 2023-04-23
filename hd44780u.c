@@ -124,9 +124,9 @@ static void SendHalfByte(hd44780u_t* pDisplay, uint8_t byte)
 {
 	pDisplay->setEN(true);
 	pDisplay->setData(byte & 0x0F);
-	HD44780UDelayMS(1);
+	HD44780UDelayUS(1);
 	pDisplay->setEN(false);
-	HD44780UDelayMS(1);
+	HD44780UDelayUS(1);
 }
 #endif
 
@@ -168,7 +168,7 @@ static void WriteInstructionWithDelay(hd44780u_t* pDisplay, uint8_t instruction,
 
 	if (delay > 0)
 	{
-		HD44780UDelayMS(delay);
+		HD44780UDelayUS(delay);
 	}
 }
 
@@ -183,7 +183,7 @@ static void WriteData(hd44780u_t* pDisplay, uint8_t data)
 	pDisplay->setRW(false);
 
 	SendByte(pDisplay, data);
-	HD44780UDelayMS(WRITE_DATA_DELAY_MS);
+	HD44780UDelayUS(WRITE_DATA_DELAY_MS);
 }
 
 void HD44780USetPosition(hd44780u_t* pDisplay, uint8_t position)
@@ -253,7 +253,7 @@ void HD44780UInit(hd44780u_t* pDisplay)
 	pDisplay->setRS(false);
 	pDisplay->setRW(false);
 	//SendHalfByte(pDisplay, 0x03);
-	HD44780UDelayMS(40);
+	HD44780UDelayUS(40);
 
 	uint8_t command;
 
