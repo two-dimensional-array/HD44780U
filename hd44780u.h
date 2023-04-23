@@ -114,6 +114,7 @@ void HD44780UInit(hd44780u_t* pDisplay);
 void HD44780UClear(hd44780u_t* pDisplay);
 void HD44780UReturnHome(hd44780u_t* pDisplay);
 void HD44780USetCursor(hd44780u_t* pDisplay);
+void HD44780USetEntryMode(hd44780u_t* pDisplay);
 void HD44780USetPosition(hd44780u_t* pDisplay, uint8_t position);
 void HD44780UWriteString(hd44780u_t* pDisplay, const char* str);
 

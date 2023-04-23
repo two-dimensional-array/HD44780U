@@ -229,6 +229,11 @@ void HD44780USetCursor(hd44780u_t* pDisplay)
 	WriteInstructionWithDelay(pDisplay, command, COMMAND_SET_DISPLAY_CNTR_DELAY_MS);
 }
 
+void HD44780USetEntryMode(hd44780u_t* pDisplay)
+{
+	WriteInstructionWithDelay(pDisplay, COMMAND_SET_ENTRY_MODE | COMMAND_SET_ENTRY_MODE_DIRECTION_MASK, COMMAND_SET_ENTRY_MODE_DELAY_MS);
+}
+
 void HD44780UInit(hd44780u_t* pDisplay)
 {
 	pDisplay->setRS(false);
@@ -248,10 +253,6 @@ void HD44780UInit(hd44780u_t* pDisplay)
 
 	HD44780USetCursor(pDisplay);
 	HD44780UClear(pDisplay);
-
-	command = COMMAND_SET_ENTRY_MODE | COMMAND_SET_ENTRY_MODE_DIRECTION_MASK;
-
-	WriteInstructionWithDelay(pDisplay, command, COMMAND_SET_ENTRY_MODE_DELAY_MS);
-
+	HD44780USetEntryMode(pDisplay);
 	HD44780UReturnHome(pDisplay);
 }
