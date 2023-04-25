@@ -1,5 +1,5 @@
-# HD44780U
-
+## HD44780U
+Library for text displays based on HD44780U controller.
 ## Usage
 Add/link hd44780u.c to your project and include hd44780u.h. That's it. Implement your low-level function of delay in microseconds needed for the correct working of this library:
 ```C
@@ -8,7 +8,7 @@ void HD44780UDelayUS(volatile uint32_t micros)
     // Wait time delay in microseconds.
 }
 ```
-## Compiler Switches/Defines
+## Compiler Switches
 Define HD44780U_INCLUDE_CONFIG as compiler switch (e.g. gcc -DHD44780U_INCLUDE_CONFIG) to include a "hd44780u_config.h" definition file.
 |Name|Default value|Values|Description|
 |----|-------------|------|-----------|
