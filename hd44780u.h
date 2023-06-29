@@ -21,6 +21,10 @@ extern "C" {
 #define HD44780U_USE_ONLY_16_ROW_LENGHT  1
 #define HD44780U_USE_BOTH_ROW_LENGHTS    2
 
+#ifdef HD44780U_INCLUDE_CONFIG
+#include "hd44780u_config.h"
+#endif
+
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -64,8 +68,12 @@ enum EHD44780URowLenght
 typedef enum EHD44780URowLenght hd44780u_row_lenght_t;
 #endif
 
+#ifndef HD44780U_GPIO_TYPE
 typedef void (*hd44780u_set_gpio_state_t)(bool);
 typedef void (*hd44780u_set_data_gpio_state_t)(uint8_t);
+#else
+typedef HD44780U_GPIO_TYPE hd44780u_gpio_t;
+#endif
 
 struct SHD44780U
 {
@@ -83,10 +91,17 @@ struct SHD44780U
 #endif
     bool cursorState : 1;
     bool blinkCursorState : 1;
+#ifndef HD44780U_GPIO_TYPE
     hd44780u_set_gpio_state_t setEN;
     hd44780u_set_gpio_state_t setRW;
     hd44780u_set_gpio_state_t setRS;
     hd44780u_set_data_gpio_state_t setData;
+#else
+    hd44780u_gpio_t en;
+    hd44780u_gpio_t rw;
+    hd44780u_gpio_t rs;
+    hd44780u_gpio_t* dataPins;
+#endif
 };
 
 typedef struct SHD44780U hd44780u_t;
@@ -94,6 +109,12 @@ typedef struct SHD44780U hd44780u_t;
 // Wait time delay in microseconds.
 // This function is declared here only. You have to write your implementation somewhere.
 void HD44780UDelayUS(volatile uint32_t micros);
+
+#if (defined(HD44780U_GPIO_TYPE) && (!defined(HD44780U_GPIO_WRITE)))
+// This function is declared here only. You have to write your implementation somewhere.
+void HD44780USetPinState(hd44780u_gpio_t pin, bool state);
+#define HD44780U_GPIO_WRITE(pHW, state) HD44780USetPinState((pHW), (state))
+#endif
 
 void HD44780UInit(hd44780u_t* pDisplay);
 void HD44780UClear(hd44780u_t* pDisplay);

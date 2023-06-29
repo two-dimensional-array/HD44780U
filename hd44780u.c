@@ -1,9 +1,5 @@
 #include "hd44780u.h"
 
-#ifdef HD44780U_INCLUDE_CONFIG
-#include "hd44780u_config.h"
-#endif
-
 #ifndef HD44780U_CONN_MODE
 #define HD44780U_CONN_MODE HD44780U_USE_BOTH_CONN_MODES
 #endif
@@ -119,13 +115,48 @@
 #define __GET_FUNCTION_SET_LINES_MASK(handler) (((handler)->rowCount == TwoRows) ? COMMAND_SET_FUCTION_LINES_MASK : 0)
 #endif
 
+
+#if (HD44780U_CONN_MODE == HD44780U_USE_ONLY_HALF_CONN_MODE)
+#define __GET_DATA_SIZE(handler) (4u)
+#elif (HD44780U_CONN_MODE == HD44780U_USE_ONLY_FULL_CONN_MODE)
+#define __GET_DATA_SIZE(handler) (8u)
+#elif (HD44780U_CONN_MODE == HD44780U_USE_BOTH_CONN_MODES)
+#define __GET_DATA_SIZE(handler) ((Half == (handler)->connMode) ? 4 : 8)
+#endif
+
+#ifdef HD44780U_GPIO_WRITE
+#define __SET_EN(handler, state) (HD44780U_GPIO_WRITE(&(handler)->en, (state)))
+#define __SET_RW(handler, state) (HD44780U_GPIO_WRITE(&(handler)->rw, (state)))
+#define __SET_RS(handler, state) (HD44780U_GPIO_WRITE(&(handler)->rs, (state)))
+
+#ifndef HD44780U_GPIO_WRITE_ARR
+static void SetData(hd44780u_t* pDisplay, uint8_t byte)
+{
+	for (size_t i = 0; i < __GET_DATA_SIZE(pDisplay); i++)
+	{
+		HD44780U_GPIO_WRITE(&pDisplay->dataPins[i], (byte & 1));
+		byte >>= 1;
+	}
+}
+#define __SET_DATA(handler, data) (SetData((handler), (data)))
+#else
+#define __SET_DATA(handler, data) (HD44780U_GPIO_WRITE_ARR((handler)->dataPins, __GET_DATA_SIZE(handler), (data)))
+#endif
+
+#else
+#define __SET_EN(handler, state) ((handler)->setEN(state))
+#define __SET_RW(handler, state) ((handler)->setRW(state))
+#define __SET_RS(handler, state) ((handler)->setRS(state))
+#define __SET_DATA(handler, data) ((handler)->setData(data))
+#endif
+
 #if ((HD44780U_CONN_MODE == HD44780U_USE_ONLY_HALF_CONN_MODE) || (HD44780U_CONN_MODE == HD44780U_USE_BOTH_CONN_MODES))
 static void SendHalfByte(hd44780u_t* pDisplay, uint8_t byte)
 {
-	pDisplay->setEN(true);
-	pDisplay->setData(byte & 0x0F);
+	__SET_EN(pDisplay, true);
+	__SET_DATA(pDisplay, (byte & 0x0F));
 	HD44780UDelayUS(1);
-	pDisplay->setEN(false);
+	__SET_EN(pDisplay, false);
 	HD44780UDelayUS(1);
 }
 #endif
@@ -135,10 +166,10 @@ static void SendHalfByte(hd44780u_t* pDisplay, uint8_t byte)
 	SendHalfByte((handler), (byte));
 
 #define __SEND_BY_FULL_CONN_MODE(handler, byte) \
-	(handler)->setEN(true);                     \
-	(handler)->setData((byte));                 \
+	__SET_EN(handler, true);                     \
+	__SET_DATA(handler, (byte));                 \
 	HD44780UDelayMS(1);                         \
-	(handler)->setEN(false);                    \
+	__SET_EN(handler, false);                    \
 	HD44780UDelayMS(1);
 
 static void SendByte(hd44780u_t* pDisplay, uint8_t byte)
@@ -161,8 +192,8 @@ static void SendByte(hd44780u_t* pDisplay, uint8_t byte)
 
 static void WriteInstructionWithDelay(hd44780u_t* pDisplay, uint8_t instruction, uint32_t delay)
 {
-	pDisplay->setRS(false);
-	pDisplay->setRW(false);
+	__SET_RS(pDisplay, false);
+	__SET_RW(pDisplay, false);
 
 	SendByte(pDisplay, instruction);
 
@@ -179,8 +210,8 @@ static void WriteInstruction(hd44780u_t* pDisplay, uint8_t instruction)
 
 static void WriteData(hd44780u_t* pDisplay, uint8_t data)
 {
-	pDisplay->setRS(true);
-	pDisplay->setRW(false);
+	__SET_RS(pDisplay, true);
+	__SET_RW(pDisplay, false);
 
 	SendByte(pDisplay, data);
 	HD44780UDelayUS(WRITE_DATA_DELAY_MS);
@@ -250,8 +281,8 @@ void HD44780USetEntryMode(hd44780u_t* pDisplay)
 
 void HD44780UInit(hd44780u_t* pDisplay)
 {
-	pDisplay->setRS(false);
-	pDisplay->setRW(false);
+	__SET_RS(pDisplay, false);
+	__SET_RW(pDisplay, false);
 	//SendHalfByte(pDisplay, 0x03);
 	HD44780UDelayUS(40);
 
