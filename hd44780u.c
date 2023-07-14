@@ -203,11 +203,6 @@ static void WriteInstructionWithDelay(hd44780u_t* pDisplay, uint8_t instruction,
 	}
 }
 
-static void WriteInstruction(hd44780u_t* pDisplay, uint8_t instruction)
-{
-	WriteInstructionWithDelay(pDisplay, instruction, 0ul);
-}
-
 static void WriteData(hd44780u_t* pDisplay, uint8_t data)
 {
 	__SET_RS(pDisplay, true);
@@ -234,7 +229,12 @@ void HD44780USetPosition(hd44780u_t* pDisplay, uint8_t position)
 
 void HD44780UWriteString(hd44780u_t* pDisplay, const char* str)
 {
-	HD44780USetPosition(pDisplay, 0);
+	HD44780UWriteStringWithOffset(pDisplay, 0, str);
+}
+
+void HD44780UWriteStringWithOffset(hd44780u_t* pDisplay, uint8_t offset, const char* str)
+{
+	HD44780USetPosition(pDisplay, offset);
 
 	for(uint8_t i = 0; (str[i] != 0 && i < 32); i++)
 	{

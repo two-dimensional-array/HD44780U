@@ -100,15 +100,17 @@ struct SHD44780U
     hd44780u_gpio_t en;
     hd44780u_gpio_t rw;
     hd44780u_gpio_t rs;
-    hd44780u_gpio_t* dataPins;
+    hd44780u_gpio_t* const dataPins;
 #endif
 };
 
 typedef struct SHD44780U hd44780u_t;
 
+#ifndef HD44780U_DELAY_US
 // Wait time delay in microseconds.
 // This function is declared here only. You have to write your implementation somewhere.
 void HD44780UDelayUS(volatile uint32_t micros);
+#endif
 
 #if (defined(HD44780U_GPIO_TYPE) && (!defined(HD44780U_GPIO_WRITE)))
 // This function is declared here only. You have to write your implementation somewhere.
@@ -123,6 +125,7 @@ void HD44780USetCursor(hd44780u_t* pDisplay);
 void HD44780USetEntryMode(hd44780u_t* pDisplay);
 void HD44780USetPosition(hd44780u_t* pDisplay, uint8_t position);
 void HD44780UWriteString(hd44780u_t* pDisplay, const char* str);
+void HD44780UWriteStringWithOffset(hd44780u_t* pDisplay, uint8_t offset, const char* str);
 
 #ifdef __cplusplus
 }
