@@ -22,7 +22,7 @@ extern "C" {
 #define HD44780U_USE_BOTH_ROW_LENGHTS    2
 
 #ifdef HD44780U_INCLUDE_CONFIG
-#include "hd44780u_config.h"
+#include <hd44780u_config.h>
 #endif
 
 #include <stdint.h>
